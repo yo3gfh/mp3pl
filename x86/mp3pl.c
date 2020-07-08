@@ -1087,7 +1087,6 @@ static INIT_STATUS App_Init ( HWND hDlg )
     return ERR_SUCCESS;
 }
 
-
 static INIT_STATUS Global_Init ( void )
 /**************************************************************************************************************/
 /* init global vars and BASS lib                                                                              */

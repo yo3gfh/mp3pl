@@ -193,9 +193,6 @@ BOOL Playlist_Add ( HWND hList, HWND hParent, HINSTANCE hInst )
     return TRUE;
 }
 
-
-//
-
 BOOL Playlist_SaveToFile ( HWND hList, const TCHAR * name )
 /*****************************************************************************************************************/
 /* save the playlist                                                                                             */
