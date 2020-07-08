@@ -33,7 +33,7 @@
         - save and load playlists
         - volume, spectrum analyzer and waveform (scope) display
         
-    Please note that this is cca. 20 yesrs old code, not particullary something
+    Please note that this is cca. 20 years old code, not particullary something
     to write home about :-))
     
     It's taylored to my own needs, modify it to suit your own. I'm not a professional programmer,
