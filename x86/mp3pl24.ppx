@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings version="1.0">
+	<category name="mp3pl.rc" />
+	<category name="mp3pl.h" />
+	<category name="main.c" />
+	<category name="resource.h" />
+	<category name="lv.c" />
+	<category name="tray.h" />
+	<category name="tray.c" />
+	<category name="misc.h" />
+	<category name="misc.c">
+		<category name="Window">
+			<property name="Left" type="integer">-8</property>
+			<property name="Top" type="integer">-30</property>
+			<property name="Right" type="integer">1651</property>
+			<property name="Bottom" type="integer">738</property>
+			<property name="Maximized" type="integer">1</property>
+			<property name="Active" type="integer">1</property>
+		</category>
+	</category>
+	<category name="mp3pl.c">
+		<category name="Window">
+			<property name="Left" type="integer">0</property>
+			<property name="Top" type="integer">0</property>
+			<property name="Right" type="integer">1440</property>
+			<property name="Bottom" type="integer">547</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="lv.h" />
+	<category name="playlist.c" />
+	<category name="draw.c" />
+	<category name="audiodev.h" />
+	<category name="audiodev.c" />
+	<category name="playlist.h" />
+	<category name="draw.h" />
+</settings>

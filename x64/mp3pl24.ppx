@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings version="1.0">
+	<category name="mp3pl.rc" />
+	<category name="mp3pl.h">
+		<category name="Window">
+			<property name="Left" type="integer">0</property>
+			<property name="Top" type="integer">0</property>
+			<property name="Right" type="integer">1440</property>
+			<property name="Bottom" type="integer">547</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="main.c" />
+	<category name="resource.h">
+		<category name="Window">
+			<property name="Left" type="integer">25</property>
+			<property name="Top" type="integer">25</property>
+			<property name="Right" type="integer">1465</property>
+			<property name="Bottom" type="integer">572</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="lv.c">
+		<category name="Window">
+			<property name="Left" type="integer">50</property>
+			<property name="Top" type="integer">50</property>
+			<property name="Right" type="integer">1490</property>
+			<property name="Bottom" type="integer">597</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="tray.h">
+		<category name="Window">
+			<property name="Left" type="integer">75</property>
+			<property name="Top" type="integer">75</property>
+			<property name="Right" type="integer">1515</property>
+			<property name="Bottom" type="integer">622</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="tray.c">
+		<category name="Window">
+			<property name="Left" type="integer">100</property>
+			<property name="Top" type="integer">100</property>
+			<property name="Right" type="integer">1540</property>
+			<property name="Bottom" type="integer">647</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="misc.h">
+		<category name="Window">
+			<property name="Left" type="integer">125</property>
+			<property name="Top" type="integer">125</property>
+			<property name="Right" type="integer">1565</property>
+			<property name="Bottom" type="integer">672</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="misc.c">
+		<category name="Window">
+			<property name="Left" type="integer">-8</property>
+			<property name="Top" type="integer">-30</property>
+			<property name="Right" type="integer">1651</property>
+			<property name="Bottom" type="integer">738</property>
+			<property name="Maximized" type="integer">1</property>
+			<property name="Active" type="integer">1</property>
+		</category>
+	</category>
+	<category name="mp3pl.c">
+		<category name="Window">
+			<property name="Left" type="integer">175</property>
+			<property name="Top" type="integer">175</property>
+			<property name="Right" type="integer">1615</property>
+			<property name="Bottom" type="integer">722</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="lv.h">
+		<category name="Window">
+			<property name="Left" type="integer">200</property>
+			<property name="Top" type="integer">200</property>
+			<property name="Right" type="integer">1640</property>
+			<property name="Bottom" type="integer">747</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="playlist.c">
+		<category name="Window">
+			<property name="Left" type="integer">225</property>
+			<property name="Top" type="integer">225</property>
+			<property name="Right" type="integer">1665</property>
+			<property name="Bottom" type="integer">772</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="draw.c">
+		<category name="Window">
+			<property name="Left" type="integer">0</property>
+			<property name="Top" type="integer">0</property>
+			<property name="Right" type="integer">1440</property>
+			<property name="Bottom" type="integer">547</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="audiodev.h">
+		<category name="Window">
+			<property name="Left" type="integer">25</property>
+			<property name="Top" type="integer">25</property>
+			<property name="Right" type="integer">1465</property>
+			<property name="Bottom" type="integer">572</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="audiodev.c">
+		<category name="Window">
+			<property name="Left" type="integer">50</property>
+			<property name="Top" type="integer">50</property>
+			<property name="Right" type="integer">1490</property>
+			<property name="Bottom" type="integer">597</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="playlist.h">
+		<category name="Window">
+			<property name="Left" type="integer">75</property>
+			<property name="Top" type="integer">75</property>
+			<property name="Right" type="integer">1515</property>
+			<property name="Bottom" type="integer">622</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="draw.h">
+		<category name="Window">
+			<property name="Left" type="integer">100</property>
+			<property name="Top" type="integer">100</property>
+			<property name="Right" type="integer">1540</property>
+			<property name="Bottom" type="integer">647</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+</settings>
