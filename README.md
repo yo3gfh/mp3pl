@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -------
 
-**Features
+**Features**
 
 * play mp3 and flac files
 * save and load playlists
