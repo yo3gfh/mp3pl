@@ -123,7 +123,7 @@ FONT 8, "Tahoma", 0, 0, 1
   VK_SPACE, -25530, VIRTKEY, NOINVERT
 }
 
-1 MANIFEST "res1.xml"
+1 MANIFEST "w7.manifest"
 
 500 ICON "res1.ico"
 

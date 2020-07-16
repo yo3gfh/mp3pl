@@ -540,6 +540,7 @@ static void CALLBACK MP3_UpdateStatus ( UINT uTimerID, UINT uMsg, DWORD dwUser, 
     DWORD       time;
     TCHAR       temp[16];
     QWORD       pos;
+    void        ( *spec_scope[] )( void ) = { UpdateSpec, UpdateScope }; // function pointers array
 
     if ( !g_hStream || !g_SpecBuf || !g_VolBuf || g_Minimized || g_Busy || !g_Playing || g_Paused ) { return; }
 
@@ -548,8 +549,7 @@ static void CALLBACK MP3_UpdateStatus ( UINT uTimerID, UINT uMsg, DWORD dwUser, 
     time = (DWORD)BASS_ChannelBytes2Seconds ( g_hStream, pos );
     wsprintf ( temp, TEXT("%02d:%02d"), time/60, time%60 );
     SetDlgItemText ( g_hDlg, IDC_TIME, temp );
-    if ( g_havescope ) { UpdateScope(); }
-    else { UpdateSpec(); }
+    ( *spec_scope[g_havescope] )(); // select the appropriate function
     UpdateLevels();
 }
 
