@@ -1,7 +1,7 @@
 ## MP3PL, a small mp3 and flac player
 
 Copyright (c) 2002-2020 Adrian Petrila, YO3GFH<br>
-Uses the BASS sound system by Ian Luck (http://www.un4seen.com/)<br>
+Uses the BASS sound system by Ian Luck (<http://www.un4seen.com/>)<br>
 Inspired by the examples included with the bass library.
 
 This was my "most ambitious" project at the time, right before being
