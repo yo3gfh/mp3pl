@@ -66,14 +66,14 @@
 static void             LVDrag              ( HWND hList, DWORD x, DWORD y );
 static void             LVEndDrag           ( HWND hList );
 
-static LRESULT CALLBACK DlgProc             ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam );
+static INT_PTR CALLBACK DlgProc             ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam );
 static void             Process_WM_COMMAND  ( HWND hDlg, WPARAM wParam, LPARAM lParam );
 static void             Process_WM_NOTIFY   ( HWND hDlg, WPARAM wParam, LPARAM lParam );
 static void             Process_WM_HSCROLL  ( HWND hDlg, WPARAM wParam, LPARAM lParam );
 static void             Process_WM_TRAY     ( HWND hDlg, WPARAM wParam, LPARAM lParam );
-static LRESULT CALLBACK LVSubclassProc      ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
-static LRESULT CALLBACK SpecSubclassProc    ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
-static LRESULT CALLBACK VolSubclassProc     ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
+static INT_PTR CALLBACK LVSubclassProc      ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
+static INT_PTR CALLBACK SpecSubclassProc    ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
+static INT_PTR CALLBACK VolSubclassProc     ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
 
 static void CALLBACK    MP3_UpdateStatus    ( UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2 );
 
@@ -205,7 +205,7 @@ int WINAPI WinMain ( HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     return 0;
 }
 
-static LRESULT CALLBACK DlgProc ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam )
+static INT_PTR CALLBACK DlgProc ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam )
 /**************************************************************************************************************/
 /* DLG procedure for the main window                                                                          */
 {
@@ -598,7 +598,7 @@ static void ContextMenu ( HWND hwnd, DWORD flags )
                        pt.x, pt.y, hwnd, NULL );
 }
 
-static LRESULT CALLBACK LVSubclassProc ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
+static INT_PTR CALLBACK LVSubclassProc ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
 /**************************************************************************************************************/
 /* subclassing the playlist (listview) control so that we can access certain events and custom handle them    */
 {
@@ -623,7 +623,7 @@ static LRESULT CALLBACK LVSubclassProc ( HWND hwnd, UINT message, WPARAM wParam,
     return CallWindowProc ( g_OldListProc, hwnd, message, wParam, lParam );
 }
 
-static LRESULT CALLBACK SpecSubclassProc ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
+static INT_PTR CALLBACK SpecSubclassProc ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
 /**************************************************************************************************************/
 /* subclassing the spectrum analyzer display control so that we can access                                    */ 
 /* certain events and custom handle them                                                                      */
@@ -647,7 +647,7 @@ static LRESULT CALLBACK SpecSubclassProc ( HWND hwnd, UINT message, WPARAM wPara
     return CallWindowProc ( g_OldSpecProc, hwnd, message, wParam, lParam );
 }
 
-static LRESULT CALLBACK VolSubclassProc ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
+static INT_PTR CALLBACK VolSubclassProc ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
 /**************************************************************************************************************/
 /* subclassing the volume bargraph display control so that we can access                                      */ 
 /* certain events and custom handle them                                                                      */
