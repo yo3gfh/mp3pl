@@ -43,8 +43,11 @@
 */
 
 #include        <windows.h>
+#include        <strsafe.h>
 #include        <shellapi.h>
 #include        "tray.h"
+
+#pragma warn(disable: 2231 2030 2260) //enum not used in switch, = used in conditional
 
 BOOL Tray_Add ( HWND hwnd, UINT uID, HICON hicon, const TCHAR * lpszTip )
 /*****************************************************************************************************************/
@@ -59,9 +62,9 @@ BOOL Tray_Add ( HWND hwnd, UINT uID, HICON hicon, const TCHAR * lpszTip )
     ni.uCallbackMessage = WM_TRAY;
     ni.hIcon            = hicon;
     if ( lpszTip )
-        lstrcpyn( ni.szTip, lpszTip, sizeof ( ni.szTip ) );
+        StringCchCopyN ( ni.szTip, ARRAYSIZE(ni.szTip), lpszTip, ARRAYSIZE(ni.szTip)-1 );
     else
-        ni.szTip[0] = '\0';
+        ni.szTip[0] = TEXT('\0');
 
     return Shell_NotifyIcon ( NIM_ADD, &ni );
 }

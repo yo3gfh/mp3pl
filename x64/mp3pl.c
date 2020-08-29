@@ -1026,7 +1026,6 @@ static INIT_STATUS App_Init ( HWND hDlg )
     g_hDevList   = GetDlgItem ( hDlg, IDC_DEVLIST );
     if ( !g_hDevList ) { return ERR_DEV_LIST; }
         
-
     if ( !AudioDevListInit ( g_hDevList ) ) { return ERR_DEV_LIST; }
 
     g_hSpec     = GetDlgItem ( hDlg, IDC_SPEC );

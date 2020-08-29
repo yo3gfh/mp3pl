@@ -43,9 +43,12 @@
 */
 
 #include        <windows.h>
+#include        <strsafe.h>
 #include        <tchar.h>
 #include        <stdlib.h>
 #include        <bass.h>
+
+#pragma warn(disable: 2231 2030 2260) //enum not used in switch, = used in conditional
 
 BOOL AudioDevListInit ( HWND hList )
 /**************************************************************************************************************/
@@ -67,13 +70,16 @@ BOOL AudioDevListInit ( HWND hList )
             TCHAR wname[256];
             wchars = MultiByteToWideChar ( CP_ACP, 0, devinfo.name, -1, NULL, 0 );
             MultiByteToWideChar ( CP_ACP, 0, devinfo.name, -1, wname, wchars );
-            wsprintf ( buf, TEXT("%d %s"), i, wname );
+            //wsprintf ( buf, TEXT("%d %s"), i, wname );
+            StringCchPrintf ( buf, ARRAYSIZE(buf), L"%d %ls", i, wname );
 #else
-            wsprintf ( buf, TEXT("%d %s"), i, devinfo.name );
+            //wsprintf ( buf, TEXT("%d %s"), i, devinfo.name );
+            StringCchPrintf ( buf, ARRAYSIZE(buf), "%d %s", i, wname );
 #endif
             if ( devinfo.flags & BASS_DEVICE_DEFAULT )
             {
-                lstrcat ( buf, TEXT(" (default)") );
+                //lstrcat ( buf, TEXT(" (default)") );
+                StringCchCat ( buf, ARRAYSIZE(buf), TEXT(" (default)") );
                 SendMessage ( hList, LB_ADDSTRING, 0, (LPARAM)buf );
                 SendMessage ( hList, LB_SETCURSEL, enabled, 0 );
             }

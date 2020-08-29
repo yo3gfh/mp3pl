@@ -45,11 +45,14 @@
 #include        <windows.h>
 #include        <commctrl.h>
 #include        <bass.h>
+#include        <strsafe.h>
 
 #include        "playlist.h"
 #include        "resource.h"
 #include        "lv.h"
 #include        "draw.h"
+
+#pragma warn(disable: 2231 2030 2260) //enum not used in switch, = used in conditional
 
 const TCHAR * add_title     = TEXT("Add file(s) to playlist...");
 const TCHAR * opn_title     = TEXT("Open playlist...");
@@ -113,7 +116,7 @@ BOOL Playlist_LoadFromCmdl ( HWND hList, TCHAR ** filelist, int files )
             len = BASS_ChannelGetLength ( stream, BASS_POS_BYTE );
             time = (DWORD)BASS_ChannelBytes2Seconds ( stream, len );
             BASS_StreamFree ( stream );
-            wsprintf ( temp, TEXT("%02d:%02d"), time/60, time%60 );
+            StringCchPrintf ( temp, ARRAYSIZE(temp), TEXT("%02d:%02d"), time/60, time%60 );
             LVSetItemText ( hList, last_index, 1, temp );
         }
     }
@@ -134,20 +137,20 @@ BOOL Playlist_LoadFromMem ( HWND hList, const TCHAR * filebuf, DWORD dirlen )
     i = dirlen;
     j = LVGetCount ( hList );
 
-    lstrcpyn ( curdir, filebuf, dirlen+1 );
+    StringCchCopyN ( curdir, ARRAYSIZE(curdir), filebuf, dirlen );
 
     while ( !curdir[dirlen] )
         dirlen--;
         
     if ( curdir[dirlen] != TEXT('\\') )
-        lstrcat ( curdir, TEXT("\\") );
+        StringCchCat ( curdir, ARRAYSIZE(curdir), TEXT("\\") );
 
     __try
     {
         do
         {
-            lstrcpy ( file, curdir );
-            lstrcat ( file, (TCHAR*)(&(filebuf[i])) );
+            StringCchCopy ( file, ARRAYSIZE(file), curdir );
+            StringCchCat ( file, ARRAYSIZE(file), (TCHAR*)(&(filebuf[i])) );
             LVInsertItem ( hList, j, 0, file );
             #ifdef  UNICODE
             stream = BASS_StreamCreateFile ( FALSE, file, 0, 0, BASS_STREAM_DECODE | BASS_UNICODE | BASS_ASYNCFILE );
@@ -159,7 +162,7 @@ BOOL Playlist_LoadFromMem ( HWND hList, const TCHAR * filebuf, DWORD dirlen )
                 len = BASS_ChannelGetLength ( stream, BASS_POS_BYTE );
                 time = (DWORD)BASS_ChannelBytes2Seconds ( stream, len );
                 BASS_StreamFree ( stream );
-                wsprintf ( file, TEXT("%02d:%02d"), time/60, time%60 );
+                StringCchPrintf ( file, ARRAYSIZE(file), TEXT("%02d:%02d"), time/60, time%60 );
                 LVSetItemText ( hList, j, 1, file );
             }
             i += lstrlen ( (TCHAR*)(&(filebuf[i])) );
@@ -238,14 +241,14 @@ BOOL Playlist_SaveToFile ( HWND hList, const TCHAR * name )
     count = LVGetCount ( hList );
     if ( count == 0 ) { return FALSE; }
 
-    wsprintf ( temp, TEXT("%lu"), count );
+    StringCchPrintf ( temp, ARRAYSIZE(temp), TEXT("%lu"), count ); 
     WritePrivateProfileString ( TEXT("playlist"), TEXT("itemcount"), temp, name );
 
     for ( i = 0; i < count; i++ )
     {
         LVGetItemText ( hList, i, 0, filename, sizeof(filename) );
         LVGetItemText ( hList, i, 1, length, sizeof(length) );
-        wsprintf ( temp, TEXT("item%lu"), i );
+        StringCchPrintf ( temp, ARRAYSIZE(temp), TEXT("item%lu"), i ); 
         WritePrivateProfileString ( temp, TEXT("filename"), filename, name );
         WritePrivateProfileString ( temp, TEXT("length"), length, name );
     }
@@ -268,7 +271,7 @@ BOOL Playlist_LoadFromFile ( HWND hList, const TCHAR * name )
 
     for ( i = 0; i < count; i++ )
     {
-        wsprintf ( temp, TEXT("item%lu"), i );
+        StringCchPrintf ( temp, ARRAYSIZE(temp), TEXT("item%lu"), i );
         GetPrivateProfileString ( temp, TEXT("filename"), TEXT("get_laid.mp3"), filename, sizeof(filename), name );
         GetPrivateProfileString ( temp, TEXT("length"), TEXT("69:69"), length, sizeof(length), name );
         LVInsertItem ( hList, crtcount+i, 0, filename );

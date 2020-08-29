@@ -43,8 +43,11 @@
 */
 
 #include        <windows.h>
+#include        <strsafe.h>
 #include        <bass.h>
 #include        "resource.h"
+
+#pragma warn(disable: 2231 2030 2260) //enum not used in switch, = used in conditional
 
 const TCHAR * app_title     = TEXT("Lil' MP3 player");
 
@@ -96,7 +99,8 @@ const TCHAR * Extract_path ( const TCHAR * src, BOOL last_bslash )
         idx--;
     if ( idx == 0 ) { return NULL; }
     if ( last_bslash ) { idx++; }
-    lstrcpyn ( temp, src, idx+1 );
+    //lstrcpyn ( temp, src, idx+1 );
+    StringCchCopyN ( temp, ARRAYSIZE(temp), src, idx );
     return temp;
 }
 
@@ -131,8 +135,10 @@ BOOL Load_BASS_Plugins ( void )
     #endif
 
     GetModuleFileName ( 0, path, sizeof ( path ) );
-    lstrcpyn ( temp, Extract_path ( path, TRUE ), MAX_PATH );
-    lstrcat ( temp, TEXT("bass*.dll") );
+    //lstrcpyn ( temp, Extract_path ( path, TRUE ), MAX_PATH );
+    StringCchCopyN ( temp, ARRAYSIZE(temp), Extract_path ( path, TRUE ), MAX_PATH-1 );
+    //lstrcat ( temp, TEXT("bass*.dll") );
+    StringCchCat ( temp, ARRAYSIZE(temp), TEXT("bass*.dll") );
 
     fh = FindFirstFile ( temp, &fd );
 
@@ -158,8 +164,11 @@ void BASS_Error ( HWND howner, const TCHAR * message )
 /* fetch last BASS error                                                                                         */
 {
     TCHAR   temp[128];
-
-    wsprintf ( temp, TEXT("%s\nError code: %d"), message, BASS_ErrorGetCode() );
+#ifdef UNICODE
+    StringCchPrintf ( temp, ARRAYSIZE(temp), L"%ls\nError code: %d", message, BASS_ErrorGetCode() );
+#else
+    StringCchPrintf ( temp, ARRAYSIZE(temp), "%s\nError code: %d", message, BASS_ErrorGetCode() );
+#endif
     ShowMessage ( howner, temp, MB_OK );
 }
 
