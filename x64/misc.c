@@ -162,3 +162,95 @@ void BASS_Error ( HWND howner, const TCHAR * message )
     wsprintf ( temp, TEXT("%s\nError code: %d"), message, BASS_ErrorGetCode() );
     ShowMessage ( howner, temp, MB_OK );
 }
+
+BOOL IsThereAnotherInstance ( const TCHAR * classname )
+/*****************************************************************************************************************/
+{
+    return ( FindWindow ( classname, NULL ) != NULL );
+}
+
+TCHAR ** FILE_CommandLineToArgv ( TCHAR * CmdLine, int * _argc )
+/*****************************************************************************************************************/
+/* Thanks to Alexander A. Telyatnikov                                                                            */
+/* http://alter.org.ua/en/docs/win/args/                                                                         */
+/* Don't forget to GlobalFree                                                                                    */
+
+{
+    TCHAR       ** argv;
+    TCHAR       *  _argv;
+    ULONG       len;
+    ULONG       argc;
+    TCHAR       a;
+    ULONG       i, j;
+
+    BOOLEAN     in_QM;
+    BOOLEAN     in_TEXT;
+    BOOLEAN     in_SPACE;
+
+    if ( CmdLine == NULL || _argc == NULL ) { return NULL; }
+
+    len = lstrlen ( CmdLine );
+    i = ((len+2)/2)*sizeof(PVOID) + sizeof(PVOID);
+
+    argv = (TCHAR**)GlobalAlloc(GMEM_FIXED, i + (len+2)*sizeof(TCHAR));
+    if ( argv == NULL ) { return NULL; }
+    _argv = (TCHAR*)(((UCHAR*)argv)+i);
+
+    argc = 0;
+    argv[argc] = _argv;
+    in_QM = FALSE;
+    in_TEXT = FALSE;
+    in_SPACE = TRUE;
+    i = 0;
+    j = 0;
+
+    while( a = CmdLine[i] ) {
+        if(in_QM) {
+            if(a == TEXT('\"')) {
+                in_QM = FALSE;
+            } else {
+                _argv[j] = a;
+                j++;
+            }
+        } else {
+            switch(a) {
+            case TEXT('\"'):
+                in_QM = TRUE;
+                in_TEXT = TRUE;
+                if(in_SPACE) {
+                    argv[argc] = _argv+j;
+                    argc++;
+                }
+                in_SPACE = FALSE;
+                break;
+            case TEXT(' '):
+            case TEXT('\t'):
+            case TEXT('\n'):
+            case TEXT('\r'):
+                if(in_TEXT) {
+                    _argv[j] = TEXT('\0');
+                    j++;
+                }
+                in_TEXT = FALSE;
+                in_SPACE = TRUE;
+                break;
+            default:
+                in_TEXT = TRUE;
+                if(in_SPACE) {
+                    argv[argc] = _argv+j;
+                    argc++;
+                }
+                _argv[j] = a;
+                j++;
+                in_SPACE = FALSE;
+                break;
+            }
+        }
+        i++;
+    }
+    _argv[j] = TEXT('\0');
+    argv[argc] = NULL;
+
+    (*_argc) = argc;
+    return argv;
+}

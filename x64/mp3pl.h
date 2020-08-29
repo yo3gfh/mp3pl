@@ -57,6 +57,7 @@
                             ( 256 * ( sizeof ( RGBQUAD ) ) ) ) // DIB header size
 
 #define     FFTS            1024
-
+#define     APP_CLASSNAME   TEXT("MPL_CLASS_666")
+#define     COPYDATA_MAGIC  0x0666DEAD
 
 #endif

@@ -87,9 +87,42 @@ void Playlist_Init ( HWND hList, HINSTANCE hInst, HIMAGELIST * pIml )
         LVInsertColumn ( hList, i, cd[i].text, cd[i].flags, cd[i].width, -1 );
 }
 
+BOOL Playlist_LoadFromCmdl ( HWND hList, TCHAR ** filelist, int files )
+/*****************************************************************************************************************/
+/* fetch files from commandline                                                                                  */
+{
+    int         i, last_index;
+    HSTREAM     stream;
+    DWORD       time;
+    QWORD       len;
+    TCHAR       temp[32];
+
+    if ( filelist == NULL ) { return FALSE; }
+    last_index = LVGetCount ( hList );
+
+    for ( i = 1; i < files; i++, last_index++ )
+    {
+        LVInsertItem ( hList, last_index, 0, filelist[i] );
+        #ifdef  UNICODE
+        stream = BASS_StreamCreateFile ( FALSE, filelist[i], 0, 0, BASS_STREAM_DECODE | BASS_UNICODE | BASS_ASYNCFILE );
+        #else
+        stream = BASS_StreamCreateFile ( FALSE, filelist[i], 0, 0, BASS_STREAM_DECODE | BASS_ASYNCFILE );
+        #endif
+        if ( stream )
+        {
+            len = BASS_ChannelGetLength ( stream, BASS_POS_BYTE );
+            time = (DWORD)BASS_ChannelBytes2Seconds ( stream, len );
+            BASS_StreamFree ( stream );
+            wsprintf ( temp, TEXT("%02d:%02d"), time/60, time%60 );
+            LVSetItemText ( hList, last_index, 1, temp );
+        }
+    }
+    return TRUE;
+}
+
 BOOL Playlist_LoadFromMem ( HWND hList, const TCHAR * filebuf, DWORD dirlen )
 /*****************************************************************************************************************/
-/* fetch files from the lump return by OpenFileDlg                                                               */
+/* fetch files from the lump returned by OpenFileDlg                                                             */
 {
     DWORD       i, j, time;
     HSTREAM     stream;
@@ -168,7 +201,7 @@ BOOL Playlist_Add ( HWND hList, HWND hParent, HINSTANCE hInst )
     ofn.lpstrFilter     = add_filter;
     ofn.nFilterIndex    = 1;
     ofn.lpstrFile       = filebuf;
-    ofn.nMaxFile        = ALLOC_SIZE;
+    ofn.nMaxFile        = ALLOC_SIZE / sizeof(TCHAR);
     ofn.lpstrTitle      = add_title;
     ofn.lpstrDefExt     = add_defext;
 
@@ -263,7 +296,7 @@ BOOL Playlist_Open ( HWND hList, HWND hParent, HINSTANCE hInst )
     ofn.lpstrFilter     = opn_filter;
     ofn.nFilterIndex    = 1;
     ofn.lpstrFile       = filebuf;
-    ofn.nMaxFile        = sizeof ( filebuf );
+    ofn.nMaxFile        = ARRAYSIZE ( filebuf );
     ofn.lpstrTitle      = opn_title;
     ofn.lpstrDefExt     = opn_defext;
 
@@ -298,7 +331,7 @@ BOOL Playlist_Save ( HWND hList, HWND hParent, HINSTANCE hInst )
     ofn.lpstrFilter     = opn_filter;
     ofn.nFilterIndex    = 1;
     ofn.lpstrFile       = filebuf;
-    ofn.nMaxFile        = sizeof ( filebuf );
+    ofn.nMaxFile        = ARRAYSIZE ( filebuf );
     ofn.lpstrTitle      = sav_title;
     ofn.lpstrDefExt     = opn_defext;
 

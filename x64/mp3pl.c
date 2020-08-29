@@ -71,6 +71,7 @@ static void             Process_WM_COMMAND  ( HWND hDlg, WPARAM wParam, LPARAM l
 static void             Process_WM_NOTIFY   ( HWND hDlg, WPARAM wParam, LPARAM lParam );
 static void             Process_WM_HSCROLL  ( HWND hDlg, WPARAM wParam, LPARAM lParam );
 static void             Process_WM_TRAY     ( HWND hDlg, WPARAM wParam, LPARAM lParam );
+static BOOL             Process_WM_COPYDATA ( HWND hwnd, WPARAM wParam, LPARAM lParam );
 static INT_PTR CALLBACK LVSubclassProc      ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
 static INT_PTR CALLBACK SpecSubclassProc    ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
 static INT_PTR CALLBACK VolSubclassProc     ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
@@ -220,6 +221,10 @@ static INT_PTR CALLBACK DlgProc ( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lP
                 ShowMessage ( hDlg, g_err_messages[is], MB_OK ); // g_err_messages in "misc.c"
                 SendMessage ( hDlg, WM_CLOSE, 0, 0 );
             }
+            break;
+
+        case WM_COPYDATA:
+            Process_WM_COPYDATA ( hDlg, wParam, lParam );
             break;
 
         // process WM_HSCROLL for vol and position sliders
@@ -1093,6 +1098,9 @@ static INIT_STATUS Global_Init ( void )
 {
     WORD        current_ver;
     TCHAR       buf[128];
+    TCHAR       ** arglist;
+    int         argc;
+    WNDCLASSEX  wc;
 
     g_hInst     = GetModuleHandle ( NULL );
     g_hAccel    = LoadAccelerators ( g_hInst, MAKEINTRESOURCE ( IDR_ACC ) );
@@ -1102,7 +1110,7 @@ static INIT_STATUS Global_Init ( void )
     g_hIcon     = LoadIcon ( g_hInst, MAKEINTRESOURCE ( IDI_MAINICON ) );
     g_hTray     = LoadIcon ( g_hInst, MAKEINTRESOURCE ( IDI_LISTICON ) );
     
-    if ( FindWindow ( NULL, app_title ) != NULL ) { return ERR_APP_RUNNING; }
+    if ( IsThereAnotherInstance ( APP_CLASSNAME )) { return ERR_APP_RUNNING; }
 
     current_ver = HIWORD ( BASS_GetVersion() );
     
@@ -1116,16 +1124,86 @@ static INIT_STATUS Global_Init ( void )
     if ( !BASS_Init ( -1, 44100, 0, 0, NULL ) ) { return ERR_BASS_INIT; }    
     Load_BASS_Plugins();
     if ( !BASS_SetConfig ( BASS_CONFIG_BUFFER, 2500 ) ) { return ERR_BASS_INIT; }
-    
     InitCommonControls();
 
-    g_hDlg = CreateDialog ( g_hInst, MAKEINTRESOURCE ( IDD_MAIN ), NULL, ( DLGPROC )DlgProc );
+    // register our custom wnd class (MPL_CLASS_666)
+    wc.cbSize   = sizeof (WNDCLASSEX);
+    GetClassInfoEx ( 0, WC_DIALOG, &wc );
+    wc.lpszClassName = APP_CLASSNAME;
+    wc.style    &= ~CS_GLOBALCLASS;
+    if ( !RegisterClassEx ( &wc ) ) { return ERR_DLG_CREATE; }
+
+    g_hDlg      = CreateDialog ( g_hInst, MAKEINTRESOURCE ( IDD_MAIN ), NULL, ( DLGPROC )DlgProc );
 
     if ( !g_hDlg ) { return ERR_DLG_CREATE; }
     g_hMainmenu = GetMenu ( g_hDlg );
     BASS_Start();
+
+    arglist = FILE_CommandLineToArgv ( GetCommandLine(), &argc );
+    if ( argc >= 2 && arglist != NULL )
+    {
+        Playlist_LoadFromCmdl ( g_hList, arglist, argc );
+    }
+
+    if ( arglist != NULL )
+        GlobalFree ( arglist );
+
     return ERR_SUCCESS;
 }
+
+static BOOL Process_WM_COPYDATA ( HWND hwnd, WPARAM wParam, LPARAM lParam )
+/*******************************************************************************************************************/
+/* handle WM_COPYDATA message                                                                                      */
+{
+    BOOL            result = FALSE;
+    COPYDATASTRUCT  * pcd;
+    TCHAR           ** arglist;
+    int             argc;
+
+    pcd = (COPYDATASTRUCT *)(lParam);
+
+    if ( pcd == NULL )
+        return result;
+
+    // check for our secret preshared key with the shell ctx menu extension :-))
+    if ( pcd->dwData != COPYDATA_MAGIC )
+        return result;
+
+    __try
+    {
+        // use the same function from cmdline processing, since the received data is the same
+        arglist = FILE_CommandLineToArgv ( (TCHAR *)(pcd->lpData), &argc );
+
+        if ( argc >= 2 && arglist != NULL )
+        {
+            result = Playlist_LoadFromCmdl ( g_hList, arglist, argc );
+
+            // bring program window to foreground by momentarily making it topmost
+            // ...but only if it isn't already 8-)
+            if ( IsIconic ( hwnd ) )
+                ShowWindow ( hwnd, SW_RESTORE );
+            else
+            {
+                ShowWindow ( hwnd, SW_MINIMIZE );
+                ShowWindow ( hwnd, SW_RESTORE );
+            }
+
+            SetWindowPos ( hwnd, HWND_TOPMOST, 0, 0, 0, 0, /*SWP_NOACTIVATE*/ SWP_SHOWWINDOW| SWP_NOMOVE | SWP_NOSIZE );
+            SetWindowPos ( hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, /*SWP_NOACTIVATE*/ SWP_SHOWWINDOW| SWP_NOMOVE | SWP_NOSIZE );
+            g_Minimized = FALSE;
+        }
+    }
+    __except ( EXCEPTION_EXECUTE_HANDLER )
+    {
+        result = FALSE;
+    }
+
+    if ( arglist != NULL )
+        GlobalFree ( arglist );
+
+    return result;
+}
+
 
 static void Process_WM_COMMAND ( HWND hDlg, WPARAM wParam, LPARAM lParam )
 /**************************************************************************************************************/

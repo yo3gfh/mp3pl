@@ -59,6 +59,7 @@ typedef struct
 
 void    Playlist_Init           ( HWND hList, HINSTANCE hInst, HIMAGELIST * pIml );
 BOOL    Playlist_LoadFromMem    ( HWND hList, const TCHAR * filebuf, DWORD dirlen );
+BOOL    Playlist_LoadFromCmdl   ( HWND hList, TCHAR ** filelist, int files );
 BOOL    Playlist_Add            ( HWND hList, HWND hParent, HINSTANCE hInst );
 BOOL    Playlist_Save           ( HWND hList, HWND hParent, HINSTANCE hInst );
 BOOL    Playlist_Open           ( HWND hList, HWND hParent, HINSTANCE hInst );

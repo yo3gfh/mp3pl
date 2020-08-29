@@ -69,9 +69,11 @@ extern const TCHAR  * about_txt;
 extern const TCHAR  * hlp_txt;
 extern const TCHAR  * g_err_messages[];
 
-const TCHAR         * Extract_path      ( const TCHAR * src, BOOL last_bslash );
-int                 ShowMessage         ( HWND howner, const TCHAR * message, DWORD style );
-BOOL                Load_BASS_Plugins   ( void );
-void                BASS_Error          ( HWND howner, const TCHAR * message );
+extern const TCHAR         * Extract_path               ( const TCHAR * src, BOOL last_bslash );
+extern int                 ShowMessage                  ( HWND howner, const TCHAR * message, DWORD style );
+extern BOOL                Load_BASS_Plugins            ( void );
+extern void                BASS_Error                   ( HWND howner, const TCHAR * message );
+extern BOOL                IsThereAnotherInstance       ( const TCHAR * classname );
+extern TCHAR               ** FILE_CommandLineToArgv    ( TCHAR * CmdLine, int * _argc );
 
 #endif

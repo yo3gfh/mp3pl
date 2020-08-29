@@ -43,6 +43,7 @@
 */
 
 #include        <windows.h>
+#include        <tchar.h>
 #include        <stdlib.h>
 #include        <bass.h>
 
@@ -50,17 +51,26 @@ BOOL AudioDevListInit ( HWND hList )
 /**************************************************************************************************************/
 /* init a listbox with the active audio devices                                                               */
 {
-    TCHAR               buf[64];
+    TCHAR               buf[256];
     BASS_DEVICEINFO     devinfo;
     int                 i, enabled;
 
     enabled = 0;
-
     for ( i = 1; BASS_GetDeviceInfo ( i, &devinfo ); i++ )
     {
         if ( devinfo.flags & BASS_DEVICE_ENABLED )
         {
-            wsprintf ( buf, "%d %s", i, devinfo.name );
+            // a small hack, because BASS_SetConfig ( BASS_CONFIG_UNICODE, TRUE ) does not seem to work correctly
+            // so we let it be ANSI, and cvt. to WCHAR when doing a UNICODE build
+#ifdef UNICODE
+            int   wchars;
+            TCHAR wname[256];
+            wchars = MultiByteToWideChar ( CP_ACP, 0, devinfo.name, -1, NULL, 0 );
+            MultiByteToWideChar ( CP_ACP, 0, devinfo.name, -1, wname, wchars );
+            wsprintf ( buf, TEXT("%d %s"), i, wname );
+#else
+            wsprintf ( buf, TEXT("%d %s"), i, devinfo.name );
+#endif
             if ( devinfo.flags & BASS_DEVICE_DEFAULT )
             {
                 lstrcat ( buf, TEXT(" (default)") );
@@ -96,7 +106,7 @@ BOOL AudioDevChange ( HWND hList )
 
     SendMessage ( hList, LB_GETTEXT, ( WPARAM )sel, ( LPARAM )buf );
 
-    sel_dev = atoi ( buf );
+    sel_dev = _ttoi ( buf );
     BASS_Free();
 
     if ( !BASS_Init ( sel_dev, 44100, 0, 0, NULL ) )

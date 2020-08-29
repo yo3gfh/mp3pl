@@ -31,6 +31,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 * save and load playlists
 * volume, spectrum analyzer and waveform (scope) display
 
+In the mp3plSH folder, there's a context menu shell extension 
+that you may build and install in order to add audio files to mp3pl playlist
+by right-clicking on them in Windows Explorer. 
+
+**!!! IMPORTANT !!!** 
+
+Build both the app and the extension in the same way (as UNICODE or ANSI, 32 or 64 bit),
+otherwise interesting things start to happen :-))
+
 Please note that this is cca. 20 years old code, not particullary something
 to write home about :-))
 
