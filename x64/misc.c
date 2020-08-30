@@ -73,7 +73,7 @@ const TCHAR * g_err_messages[] = {
     TEXT("Program already up and running :)"),                          //1     
     TEXT("Wrong bass.dll version (%d.%d) - expecting %d.%d"),           //2
     TEXT("Failed to initialize sound system!"),                         //3
-    TEXT("Can't create main window!n"),                                 //4
+    TEXT("Can't create main window!"),                                  //4
     TEXT("Error initializing device list!"),                            //5
     TEXT("Error initializing volume/spectrum display!"),                //6
     TEXT("Error creating DIB for volume/spectrum display!"),            //7

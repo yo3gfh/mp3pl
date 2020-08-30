@@ -43,6 +43,7 @@
 */
 
 #include                <windows.h>
+#include                <strsafe.h>
 #include                <commctrl.h>
 #include                <shellapi.h>
 #include                <math.h>
@@ -58,6 +59,8 @@
 #include                "tray.h"
 
 #include                "resource.h"
+
+#pragma warn(disable: 2231 2030 2260) //enum not used in switch, = used in conditional
 
 //
 // FUNCTION PROTOTYPES
@@ -552,7 +555,7 @@ static void CALLBACK MP3_UpdateStatus ( UINT uTimerID, UINT uMsg, DWORD dwUser, 
     pos = BASS_ChannelGetPosition ( g_hStream, BASS_POS_BYTE );
     SendMessage ( g_hPosTrack, TBM_SETPOS, TRUE, (DWORD)(pos/g_ScaleFactor) );
     time = (DWORD)BASS_ChannelBytes2Seconds ( g_hStream, pos );
-    wsprintf ( temp, TEXT("%02d:%02d"), time/60, time%60 );
+    wsprintf ( temp, TEXT("%02d:%02d"), time/60, time%60 ); // we keep wsprintf here; I think it's faster than StringCchPrintf
     SetDlgItemText ( g_hDlg, IDC_TIME, temp );
     ( *spec_scope[g_havescope] )(); // select the appropriate function
     UpdateLevels();
@@ -598,9 +601,7 @@ static void ContextMenu ( HWND hwnd, DWORD flags )
     GetCursorPos ( &pt );
     hmain = GetMenu ( hwnd );
     hsub = GetSubMenu ( hmain, 1 );
-    TrackPopupMenuEx ( hsub,
-                       flags,
-                       pt.x, pt.y, hwnd, NULL );
+    TrackPopupMenuEx ( hsub, flags, pt.x, pt.y, hwnd, NULL );
 }
 
 static INT_PTR CALLBACK LVSubclassProc ( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
@@ -1079,7 +1080,7 @@ static INIT_STATUS App_Init ( HWND hDlg )
     SendMessage ( g_hVolTrack, TBM_SETRANGE, TRUE, (LPARAM) MAKELONG(0, 100) );
     vol = BASS_GetConfig ( BASS_CONFIG_GVOL_STREAM ) / 100;
     SendMessage ( g_hVolTrack, TBM_SETPOS, TRUE, (LPARAM) vol );
-    wsprintf ( temp, TEXT("%lu%%"), vol );
+    StringCchPrintf ( temp, ARRAYSIZE(temp), TEXT("%lu%%"), vol ); 
     SetDlgItemText ( hDlg, IDC_VOLUME, temp );
     
     if ( !Tray_Add ( hDlg, IDI_LISTICON, g_hTray, app_title ) ) { return ERR_TRAY_INIT; }
@@ -1115,7 +1116,7 @@ static INIT_STATUS Global_Init ( void )
     
     if ( current_ver != BASSVERSION )
     {
-        wsprintf ( buf, g_err_messages[ERR_BASS_VER], HIBYTE ( current_ver ), LOBYTE ( current_ver ), HIBYTE ( BASSVERSION ), LOBYTE ( BASSVERSION ) );
+        StringCchPrintf ( buf, ARRAYSIZE(buf), g_err_messages[ERR_BASS_VER], HIBYTE ( current_ver ), LOBYTE ( current_ver ), HIBYTE ( BASSVERSION ), LOBYTE ( BASSVERSION ) );
         BASS_Error ( NULL, buf );
         return ERR_BASS_VER;
     }
@@ -1177,18 +1178,21 @@ static BOOL Process_WM_COPYDATA ( HWND hwnd, WPARAM wParam, LPARAM lParam )
         {
             result = Playlist_LoadFromCmdl ( g_hList, arglist, argc );
 
-            // bring program window to foreground by momentarily making it topmost
-            // ...but only if it isn't already 8-)
+            // ok, so now let's bring our window to front...
             if ( IsIconic ( hwnd ) )
-                ShowWindow ( hwnd, SW_RESTORE );
+                // simulate a click on the tray icon
+                PostMessage ( hwnd, WM_TRAY, (WPARAM)0, (LPARAM)WM_LBUTTONDOWN );
             else
             {
+                // minimize to tray and simulate a click on the tray icon
                 ShowWindow ( hwnd, SW_MINIMIZE );
-                ShowWindow ( hwnd, SW_RESTORE );
+                PostMessage ( hwnd, WM_TRAY, (WPARAM)0, (LPARAM)WM_LBUTTONDOWN );
             }
-
+            // bring program window to foreground by momentarily making it topmost
+            // ...but only if it isn't already 8-)
             SetWindowPos ( hwnd, HWND_TOPMOST, 0, 0, 0, 0, /*SWP_NOACTIVATE*/ SWP_SHOWWINDOW| SWP_NOMOVE | SWP_NOSIZE );
             SetWindowPos ( hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, /*SWP_NOACTIVATE*/ SWP_SHOWWINDOW| SWP_NOMOVE | SWP_NOSIZE );
+            SetFocus ( g_hList );
             g_Minimized = FALSE;
         }
     }
@@ -1215,89 +1219,89 @@ static void Process_WM_COMMAND ( HWND hDlg, WPARAM wParam, LPARAM lParam )
 
     if ( LOWORD ( wParam ) == IDC_DEVLIST )
     {
-         if ( HIWORD ( wParam ) == LBN_DBLCLK )
-         {
-              if ( !AudioDevChange ( g_hDevList ) ) { BASS_Error ( hDlg, g_err_messages[ERR_CHG_PBDEV] ); return; }
-         }
+        if ( HIWORD ( wParam ) == LBN_DBLCLK )
+        {
+            if ( !AudioDevChange ( g_hDevList ) ) { BASS_Error ( hDlg, g_err_messages[ERR_CHG_PBDEV] ); return; }
+        }
     }
 
     if ( !lParam )
     {
-         switch ( LOWORD ( wParam ) )
-         {
-              case IDM_QUIT:
-                   SendMessage ( hDlg, WM_CLOSE, 0, 0 );
-                   break;
+        switch ( LOWORD ( wParam ) )
+        {
+            case IDM_QUIT:
+                SendMessage ( hDlg, WM_CLOSE, 0, 0 );
+                break;
 
-              case IDM_OPEN:
-                   Playlist_Open ( g_hList, hDlg, g_hInst );
-                   break;
+            case IDM_OPEN:
+                Playlist_Open ( g_hList, hDlg, g_hInst );
+                break;
 
-              case IDM_SAVE:
-                   Playlist_Save ( g_hList, hDlg, g_hInst );
-                   break;
+            case IDM_SAVE:
+                Playlist_Save ( g_hList, hDlg, g_hInst );
+                break;
 
-              case IDM_ADD:
-                   Playlist_Add ( g_hList, hDlg, g_hInst );
-                   break;
+            case IDM_ADD:
+                Playlist_Add ( g_hList, hDlg, g_hInst );
+                break;
 
-              case IDM_PLAY:
-                   if ( !MP3_Play() )
-                       BASS_Error ( hDlg, g_err_messages[ERR_PB_START] );
-                   break;
+            case IDM_PLAY:
+                if ( !MP3_Play() )
+                    BASS_Error ( hDlg, g_err_messages[ERR_PB_START] );
+                break;
 
-              case IDM_STOP:
-                   MP3_Stop();
-                   break;
+            case IDM_STOP:
+                MP3_Stop();
+                break;
 
-              case IDM_PAUSE:
-                   MP3_Pause();
-                   break;
+            case IDM_PAUSE:
+                MP3_Pause();
+                break;
 
-              case IDM_NEXT:
-                   if ( !MP3_Next() )
-                       BASS_Error ( hDlg, g_err_messages[ERR_PB_START] );
-                   break;
+            case IDM_NEXT:
+                if ( !MP3_Next() )
+                    BASS_Error ( hDlg, g_err_messages[ERR_PB_START] );
+                break;
 
-              case IDM_FFW:
-                   MP3_Ffw();
-                   break;
+            case IDM_FFW:
+                MP3_Ffw();
+                break;
 
-              case IDM_REW:
-                   MP3_Rew();
-                   break;
+            case IDM_REW:
+                MP3_Rew();
+                break;
 
-              case IDM_CLEAR:
-                   if ( g_Paused )
-                   MP3_Stop();
-                   LVClear ( g_hList );
-                   g_CurIndex = 0;
-                   g_LastPlayed = -1;
-                   break;
+            case IDM_CLEAR:
+                if ( g_Paused )
+                MP3_Stop();
+                LVClear ( g_hList );
+                g_CurIndex = 0;
+                g_LastPlayed = -1;
+                break;
 
-              case IDM_SELALL:
-                   LVSelectAll ( g_hList );
-                   break;
+            case IDM_SELALL:
+                LVSelectAll ( g_hList );
+                break;
 
-              case IDM_DEL:
-                   LVDeleteSelection ( g_hList );
-                   if ( g_CurIndex > LVGetCount ( g_hList ) )
-                   {
-                       g_CurIndex = 0;
-                       if ( g_Paused ) { MP3_Stop(); }
-                   }
-                   break;
+            case IDM_DEL:
+                LVDeleteSelection ( g_hList );
+                if ( g_CurIndex > LVGetCount ( g_hList ) )
+                {
+                    g_CurIndex = 0;
+                    if ( g_Paused ) { MP3_Stop(); }
+                }
+                break;
 
-              case IDM_KEYHLP:
-                   ShowMessage ( hDlg, hlp_txt, MB_OK );
-                   break;
+            case IDM_KEYHLP:
+                ShowMessage ( hDlg, hlp_txt, MB_OK );
+                break;
 
-              case IDM_ABOUT:
-                   ver = HIWORD ( BASS_GetVersion() );
-                   wsprintf ( temp, about_txt, HIBYTE ( ver ), LOBYTE ( ver ) );
-                   ShowMessage ( hDlg, temp, MB_OK );
-                   break;
-         }
+            case IDM_ABOUT:
+                ver = HIWORD ( BASS_GetVersion() );
+                StringCchPrintf ( temp, ARRAYSIZE(temp), about_txt, HIBYTE ( ver ), LOBYTE ( ver ) );
+                ShowMessage ( hDlg, temp, MB_OK );
+                break;
+        }
     }
     return;
 }
@@ -1378,7 +1382,7 @@ static void Process_WM_HSCROLL ( HWND hDlg, WPARAM wParam, LPARAM lParam )
             case TB_THUMBPOSITION:
                 vol = SendMessage ( g_hVolTrack, TBM_GETPOS, 0, 0 );
                 BASS_SetConfig ( BASS_CONFIG_GVOL_STREAM, vol * 100 );
-                wsprintf ( temp, TEXT("%lu%%"), vol );
+                StringCchPrintf ( temp, ARRAYSIZE(temp), TEXT("%lu%%"), vol );
                 SetDlgItemText ( hDlg, IDC_VOLUME, temp );
                 break;
         }
