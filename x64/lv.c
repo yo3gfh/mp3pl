@@ -41,6 +41,7 @@
 
     All the bugs are guaranteed to be genuine, and are exclusively mine =)
 */
+#pragma warn(disable: 2008 2118 2228 2231 2030 2260)
 
 #include        <windows.h>
 #include        <commctrl.h>
@@ -147,22 +148,22 @@ BOOL LVClear ( HWND hList )
 /*****************************************************************************************************************/
 /* clear all items                                                                                               */
 {
-    return SendMessage ( hList, LVM_DELETEALLITEMS, 0, 0 );
+    return (BOOL)SendMessage ( hList, LVM_DELETEALLITEMS, 0, 0 );
 }
 
 int LVGetCount ( HWND hList )
 /*****************************************************************************************************************/
 /* item count in a LV control                                                                                    */
 {
-    return SendMessage ( hList, LVM_GETITEMCOUNT, 0, 0 );
+    return (int)SendMessage ( hList, LVM_GETITEMCOUNT, 0, 0 );
 }
 
 int LVGetSelIndex ( HWND hList )
 /*****************************************************************************************************************/
 /* which item is selected                                                                                        */
 {
-    int     i, count;
-    DWORD   state;
+    int         i, count;
+    INT_PTR     state;
 
     count = LVGetCount ( hList );
     
@@ -185,8 +186,8 @@ void LVDeleteSelection ( HWND hList )
 /*****************************************************************************************************************/
 /* remove a bunch of selected items                                                                              */
 {
-    int     i, count;
-    DWORD   state;
+    int         i, count;
+    INT_PTR     state;
 
     i = 0;
     count = LVGetCount ( hList );
@@ -257,7 +258,7 @@ BOOL LVEnsureVisible ( HWND hList, int index )
 /*****************************************************************************************************************/
 /* scroll a bit to ensure item visibility                                                                        */
 {
-    return SendMessage ( hList, LVM_ENSUREVISIBLE, index, (LPARAM)FALSE );
+    return (BOOL)SendMessage ( hList, LVM_ENSUREVISIBLE, index, (LPARAM)FALSE );
 }
 
 HIMAGELIST InitImgList ( HINSTANCE hInst )

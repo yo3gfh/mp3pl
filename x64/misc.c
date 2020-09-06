@@ -41,13 +41,13 @@
 
     All the bugs are guaranteed to be genuine, and are exclusively mine =)
 */
+#pragma warn(disable: 2008 2118 2228 2231 2030 2260)
 
 #include        <windows.h>
 #include        <strsafe.h>
 #include        <bass.h>
 #include        "resource.h"
 
-#pragma warn(disable: 2231 2030 2260) //enum not used in switch, = used in conditional
 
 const TCHAR * app_title     = TEXT("Lil' MP3 player");
 

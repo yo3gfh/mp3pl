@@ -41,6 +41,7 @@
 
     All the bugs are guaranteed to be genuine, and are exclusively mine =)
 */
+#pragma warn(disable: 2008 2118 2228 2231 2030 2260)
 
 #include        <windows.h>
 #include        <strsafe.h>
@@ -48,7 +49,6 @@
 #include        <stdlib.h>
 #include        <bass.h>
 
-#pragma warn(disable: 2231 2030 2260) //enum not used in switch, = used in conditional
 
 BOOL AudioDevListInit ( HWND hList )
 /**************************************************************************************************************/
@@ -95,9 +95,9 @@ BOOL AudioDevChange ( HWND hList )
 /**************************************************************************************************************/
 /* switch to another playback device                                                                          */
 {
-    int     sel;
-    DWORD   sel_dev, old_dev;
-    TCHAR   buf[64];
+    INT_PTR     sel;
+    DWORD       sel_dev, old_dev;
+    TCHAR       buf[64];
     
     sel = SendMessage ( hList, LB_GETCURSEL, 0, 0 );
     

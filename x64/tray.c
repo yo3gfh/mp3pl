@@ -42,12 +42,13 @@
     All the bugs are guaranteed to be genuine, and are exclusively mine =)
 */
 
+#pragma warn(disable: 2008 2118 2228 2231 2030 2260)
+
 #include        <windows.h>
 #include        <strsafe.h>
 #include        <shellapi.h>
 #include        "tray.h"
 
-#pragma warn(disable: 2231 2030 2260) //enum not used in switch, = used in conditional
 
 BOOL Tray_Add ( HWND hwnd, UINT uID, HICON hicon, const TCHAR * lpszTip )
 /*****************************************************************************************************************/

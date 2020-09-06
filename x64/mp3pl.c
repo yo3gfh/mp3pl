@@ -41,6 +41,7 @@
 
     All the bugs are guaranteed to be genuine, and are exclusively mine =)
 */
+#pragma warn(disable: 2008 2118 2228 2231 2030 2260)
 
 #include                <windows.h>
 #include                <strsafe.h>
@@ -60,7 +61,6 @@
 
 #include                "resource.h"
 
-#pragma warn(disable: 2231 2030 2260) //enum not used in switch, = used in conditional
 
 //
 // FUNCTION PROTOTYPES
@@ -464,8 +464,8 @@ static BOOL MP3_Ffw ( void )
 /**************************************************************************************************************/
 /* fast forward into a stream                                                                                 */
 {
-    DWORD       trackpos;
-    QWORD       streampos;
+    INT_PTR         trackpos;
+    QWORD           streampos;
 
     g_Busy = TRUE;
     trackpos = SendMessage ( g_hPosTrack, TBM_GETPOS, 0, 0 );
@@ -493,8 +493,8 @@ static BOOL MP3_Rew ( void )
 /**************************************************************************************************************/
 /* rewind into a stream                                                                                       */
 {
-    DWORD       trackpos;
-    QWORD       streampos;
+    INT_PTR         trackpos;
+    QWORD           streampos;
 
     g_Busy = TRUE;
     trackpos = SendMessage ( g_hPosTrack, TBM_GETPOS, 0, 0 );
@@ -522,8 +522,8 @@ static BOOL MP3_SetPos ( void )
 /**************************************************************************************************************/
 /* position somewhere into a stream                                                                           */
 {
-    DWORD       trackpos;
-    QWORD       streampos;
+    INT_PTR         trackpos;
+    QWORD           streampos;
 
     if ( !g_Playing || g_Paused ) { return FALSE; }
 
@@ -743,7 +743,7 @@ static BOOL Create_DIB ( HDC * hdc, HBITMAP * hbmp, BYTE ** bmpdata, int width, 
     RGBQUAD             * pal;
     HBITMAP             bmp;
     HDC                 dc;
-    int                 a;
+    BYTE                a;
     DWORD               color;
 
     RtlZeroMemory ( head, BMP_STUFF_SIZE );
@@ -1345,8 +1345,8 @@ static void Process_WM_HSCROLL ( HWND hDlg, WPARAM wParam, LPARAM lParam )
 /**************************************************************************************************************/
 /* process WM_HSCROLL message                                                                                 */
 {
-    TCHAR   temp[32];
-    DWORD   vol;
+    TCHAR       temp[32];
+    INT_PTR     vol;
 
     if ( (HWND)lParam == g_hPosTrack )
     {
@@ -1381,8 +1381,8 @@ static void Process_WM_HSCROLL ( HWND hDlg, WPARAM wParam, LPARAM lParam )
             case TB_THUMBTRACK:
             case TB_THUMBPOSITION:
                 vol = SendMessage ( g_hVolTrack, TBM_GETPOS, 0, 0 );
-                BASS_SetConfig ( BASS_CONFIG_GVOL_STREAM, vol * 100 );
-                StringCchPrintf ( temp, ARRAYSIZE(temp), TEXT("%lu%%"), vol );
+                BASS_SetConfig ( BASS_CONFIG_GVOL_STREAM, (DWORD)(vol * 100) );
+                StringCchPrintf ( temp, ARRAYSIZE(temp), TEXT("%zd%%"), vol );
                 SetDlgItemText ( hDlg, IDC_VOLUME, temp );
                 break;
         }

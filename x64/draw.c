@@ -41,6 +41,7 @@
 
     All the bugs are guaranteed to be genuine, and are exclusively mine =)
 */
+#pragma warn(disable: 2008 2118 2228 2231 2030 2260)
 
 #include        <windows.h>
 
