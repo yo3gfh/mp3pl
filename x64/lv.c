@@ -1,46 +1,4 @@
-/*
-    MP3PL, a small mp3 and flac player 
-    -------------------------------------------------------------------
-    Copyright (c) 2002-2020 Adrian Petrila, YO3GFH
-    Uses the BASS sound system by Ian Luck (http://www.un4seen.com/)
-    Inspired by the examples included with the bass library.
-    
-    This was my "most ambitious" project at the time, right before being
-    drafted in the army. Dugged out recently and dusted off to compile with
-    Pelle's C compiler.
-    
-                                * * *
-                                
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-                                * * *
-
-    Features
-    ---------
-    
-        - play mp3 and flac files
-        - save and load playlists
-        - volume, spectrum analyzer and waveform (scope) display
-        
-    Please note that this is cca. 20 years old code, not particullary something
-    to write home about :-))
-    
-    It's taylored to my own needs, modify it to suit your own. I'm not a professional programmer,
-    so this isn't the best code you'll find on the web, you have been warned :-))
-
-    All the bugs are guaranteed to be genuine, and are exclusively mine =)
-*/
 #pragma warn(disable: 2008 2118 2228 2231 2030 2260)
 
 #include        <windows.h>
@@ -51,36 +9,74 @@
 // listview management functions
 //
 
-int LVInsertColumn ( HWND hList, int nCol, const TCHAR * lpszColumnHeading, int nFormat, int nWidth, int nSubItem )
-/*****************************************************************************************************************/
-/* insert a column into a LV control                                                                             */
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVInsertColumn 
+/*--------------------------------------------------------------------------*/
+//           Type: int 
+//    Param.    1: HWND hList                     : Listview item
+//    Param.    2: int nCol                       : col. index
+//    Param.    3: const TCHAR * lpszColumnHeading: col. title
+//    Param.    4: int nFormat                    : indentation
+//    Param.    5: int nWidth                     : col. width
+//    Param.    6: int nSubItem                   : index of subitem
+//                                                  assoc. wth column
+//                                                  (-1 if none)
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: Insert a column into a LV control
+/*--------------------------------------------------------------------@@-@@-*/
+int LVInsertColumn ( HWND hList, int nCol, const TCHAR * lpszColumnHeading, 
+    int nFormat, int nWidth, int nSubItem )
+/*--------------------------------------------------------------------------*/
 {
     LVCOLUMN column;
 
-    column.mask     = LVCF_TEXT|LVCF_FMT;
-    column.pszText  = (TCHAR *)lpszColumnHeading;
-    column.fmt      = nFormat;
+    column.mask         = LVCF_TEXT|LVCF_FMT;
+    column.pszText      = (TCHAR *)lpszColumnHeading;
+    column.cchTextMax   = lstrlen ( lpszColumnHeading );
+    column.fmt          = nFormat;
+
     if ( nWidth != -1 )
     {
         column.mask |= LVCF_WIDTH;
         column.cx = nWidth;
     }
+
     if ( nSubItem != -1 )
     {
         column.mask |= LVCF_SUBITEM;
         column.iSubItem = nSubItem;
     }
-    return ( int ) SendMessage ( hList, LVM_INSERTCOLUMN, nCol, ( LPARAM )&column );
+
+    return (int)
+        SendMessage ( hList, LVM_INSERTCOLUMN, nCol, ( LPARAM )&column );
 }
 
-int LVInsertItem ( HWND hList, int nItem, int nImgIndex, const TCHAR * lpszItem )
-/*****************************************************************************************************************/
-/* insert an item into a LV control                                                                              */
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVInsertItem 
+/*--------------------------------------------------------------------------*/
+//           Type: int 
+//    Param.    1: HWND hList             : listview item
+//    Param.    2: int nItem              : item index
+//    Param.    3: int nImgIndex          : img. list index
+//    Param.    4: const TCHAR * lpszItem : item caption
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: insert an item into a LV control
+/*--------------------------------------------------------------------@@-@@-*/
+int LVInsertItem ( HWND hList, int nItem, 
+    int nImgIndex, const TCHAR * lpszItem )
+/*--------------------------------------------------------------------------*/
 {
     LVITEM  item;
     
     item.mask       = LVIF_TEXT;
-    if ( nImgIndex != -1 ) { item.mask |= LVIF_IMAGE; }
+
+    if ( nImgIndex != -1 )
+        item.mask |= LVIF_IMAGE;
+
     item.iItem      = nItem;
     item.iSubItem   = 0;
     item.pszText    = (TCHAR *)lpszItem;
@@ -89,23 +85,50 @@ int LVInsertItem ( HWND hList, int nItem, int nImgIndex, const TCHAR * lpszItem 
     item.iImage     = nImgIndex;
     item.lParam     = 0;
 
-    return ( int ) SendMessage ( hList, LVM_INSERTITEM, 0, ( LPARAM )&item );
+    return (int)
+        SendMessage ( hList, LVM_INSERTITEM, 0, ( LPARAM )&item );
 }
 
-BOOL LVSetItemText ( HWND hList, int nItem, int nSubItem, const TCHAR * lpszText )
-/*****************************************************************************************************************/
-/* set item text                                                                                                 */
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVSetItemText 
+/*--------------------------------------------------------------------------*/
+//           Type: BOOL 
+//    Param.    1: HWND hList             : listview control
+//    Param.    2: int nItem              : item index
+//    Param.    3: int nSubItem           : subitem index
+//    Param.    4: const TCHAR * lpszText : item text
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: set item text
+/*--------------------------------------------------------------------@@-@@-*/
+BOOL LVSetItemText ( HWND hList, int nItem, 
+    int nSubItem, const TCHAR * lpszText )
+/*--------------------------------------------------------------------------*/
 {
     LVITEM  item;
 
     item.iSubItem   = nSubItem;
     item.pszText    = (TCHAR *)lpszText;
-    return ( BOOL ) SendMessage ( hList, LVM_SETITEMTEXT, nItem, ( LPARAM )&item );
+
+    return (BOOL)
+        SendMessage ( hList, LVM_SETITEMTEXT, nItem, ( LPARAM )&item );
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVSetItemImg 
+/*--------------------------------------------------------------------------*/
+//           Type: BOOL 
+//    Param.    1: HWND hList  : listview control
+//    Param.    2: int nItem   : item index
+//    Param.    3: int nImgidx : img. list index
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: set item icon
+/*--------------------------------------------------------------------@@-@@-*/
 BOOL LVSetItemImg ( HWND hList, int nItem, int nImgidx )
-/*****************************************************************************************************************/
-/* set item icon                                                                                                 */
+/*--------------------------------------------------------------------------*/
 {
     LVITEM  item;
 
@@ -116,9 +139,19 @@ BOOL LVSetItemImg ( HWND hList, int nItem, int nImgidx )
     return ( BOOL ) SendMessage ( hList, LVM_SETITEM, 0, ( LPARAM )&item );
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVGetItemImgIdx 
+/*--------------------------------------------------------------------------*/
+//           Type: int 
+//    Param.    1: HWND hList: listview control
+//    Param.    2: int nItem : item index
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: get a item image index
+/*--------------------------------------------------------------------@@-@@-*/
 int LVGetItemImgIdx ( HWND hList, int nItem )
-/*****************************************************************************************************************/
-/* get a item image index                                                                                        */
+/*--------------------------------------------------------------------------*/
 {
     LVITEM  item;
 
@@ -132,35 +165,78 @@ int LVGetItemImgIdx ( HWND hList, int nItem )
     return -1;
 }
 
-BOOL LVGetItemText ( HWND hList, int nItem, int nSubItem, TCHAR * lpszText, int size )
-/*****************************************************************************************************************/
-/* get the text from a LV item                                                                                   */
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVGetItemText 
+/*--------------------------------------------------------------------------*/
+//           Type: BOOL 
+//    Param.    1: HWND hList      : listview control
+//    Param.    2: int nItem       : item index
+//    Param.    3: int nSubItem    : subitem index
+//    Param.    4: TCHAR * lpszText: buffer to receive text
+//    Param.    5: int size        : buffer size, in chars
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: get the text from a LV item
+/*--------------------------------------------------------------------@@-@@-*/
+BOOL LVGetItemText ( HWND hList, int nItem, 
+    int nSubItem, TCHAR * lpszText, int cchMax )
+/*--------------------------------------------------------------------------*/
 {
     LVITEM  item;
 
     item.iSubItem   = nSubItem;
-    item.cchTextMax = size;
+    item.cchTextMax = cchMax;
     item.pszText    = lpszText;
-    return (BOOL) SendMessage(hList, LVM_GETITEMTEXT, nItem, ( LPARAM )&item);
+
+    return (BOOL)
+        SendMessage(hList, LVM_GETITEMTEXT, nItem, ( LPARAM )&item);
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVClear 
+/*--------------------------------------------------------------------------*/
+//           Type: BOOL 
+//    Param.    1: HWND hList : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: clear all items
+/*--------------------------------------------------------------------@@-@@-*/
 BOOL LVClear ( HWND hList )
-/*****************************************************************************************************************/
-/* clear all items                                                                                               */
+/*--------------------------------------------------------------------------*/
 {
     return (BOOL)SendMessage ( hList, LVM_DELETEALLITEMS, 0, 0 );
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVGetCount 
+/*--------------------------------------------------------------------------*/
+//           Type: int 
+//    Param.    1: HWND hList : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: item count in a LV control
+/*--------------------------------------------------------------------@@-@@-*/
 int LVGetCount ( HWND hList )
-/*****************************************************************************************************************/
-/* item count in a LV control                                                                                    */
+/*--------------------------------------------------------------------------*/
 {
     return (int)SendMessage ( hList, LVM_GETITEMCOUNT, 0, 0 );
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVGetSelIndex 
+/*--------------------------------------------------------------------------*/
+//           Type: int 
+//    Param.    1: HWND hList : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: which item is selected
+/*--------------------------------------------------------------------@@-@@-*/
 int LVGetSelIndex ( HWND hList )
-/*****************************************************************************************************************/
-/* which item is selected                                                                                        */
+/*--------------------------------------------------------------------------*/
 {
     int         i, count;
     INT_PTR     state;
@@ -170,31 +246,54 @@ int LVGetSelIndex ( HWND hList )
     for ( i = 0; i < count; i++ )
     {
         state = SendMessage ( hList, LVM_GETITEMSTATE, i, LVIS_SELECTED );
-        if ( state & LVIS_SELECTED ) { return i; }
+
+        if ( state & LVIS_SELECTED )
+            return i;
     }
+
     return -1;
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVDeleteItem 
+/*--------------------------------------------------------------------------*/
+//           Type: BOOL 
+//    Param.    1: HWND hList: 
+//    Param.    2: int item  : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: remove an item
+/*--------------------------------------------------------------------@@-@@-*/
 BOOL LVDeleteItem ( HWND hList, int item )
-/*****************************************************************************************************************/
-/* remove an item                                                                                                */
+/*--------------------------------------------------------------------------*/
 {
     return ( BOOL )SendMessage ( hList, LVM_DELETEITEM, item, 0 );
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVDeleteSelection 
+/*--------------------------------------------------------------------------*/
+//           Type: void 
+//    Param.    1: HWND hList : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: remove a bunch of selected items
+/*--------------------------------------------------------------------@@-@@-*/
 void LVDeleteSelection ( HWND hList )
-/*****************************************************************************************************************/
-/* remove a bunch of selected items                                                                              */
+/*--------------------------------------------------------------------------*/
 {
     int         i, count;
     INT_PTR     state;
 
-    i = 0;
-    count = LVGetCount ( hList );
+    i           = 0;
+    count       = LVGetCount ( hList );
 
     do
     {
-        state = SendMessage ( hList, LVM_GETITEMSTATE, i, LVIS_SELECTED );
+        state   = SendMessage ( hList, LVM_GETITEMSTATE, i, LVIS_SELECTED );
+
         if ( state & LVIS_SELECTED )
         {
             LVDeleteItem ( hList, i );
@@ -202,12 +301,23 @@ void LVDeleteSelection ( HWND hList )
         }
         else
             i++;
-    } while ( i < count );
+
+    } 
+    while ( i < count );
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVSelectAll 
+/*--------------------------------------------------------------------------*/
+//           Type: void 
+//    Param.    1: HWND hList : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: select all items
+/*--------------------------------------------------------------------@@-@@-*/
 void LVSelectAll ( HWND hList )
-/*****************************************************************************************************************/
-/* select all items                                                                                              */
+/*--------------------------------------------------------------------------*/
 {
     LVITEM  item;
 
@@ -217,9 +327,19 @@ void LVSelectAll ( HWND hList )
     SendMessage ( hList, LVM_SETITEMSTATE, (WPARAM)-1, ( LPARAM )&item );
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVSelectItem 
+/*--------------------------------------------------------------------------*/
+//           Type: void 
+//    Param.    1: HWND hList: 
+//    Param.    2: int index : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: select one
+/*--------------------------------------------------------------------@@-@@-*/
 void LVSelectItem ( HWND hList, int index )
-/*****************************************************************************************************************/
-/* select one                                                                                                    */
+/*--------------------------------------------------------------------------*/
 {
     LVITEM  item;
 
@@ -229,9 +349,19 @@ void LVSelectItem ( HWND hList, int index )
     SendMessage ( hList, LVM_SETITEMSTATE, index, ( LPARAM )&item );
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVFocusItem 
+/*--------------------------------------------------------------------------*/
+//           Type: void 
+//    Param.    1: HWND hList: 
+//    Param.    2: int index : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: focus item
+/*--------------------------------------------------------------------@@-@@-*/
 void LVFocusItem ( HWND hList, int index )
-/*****************************************************************************************************************/
-/* focus item                                                                                                    */
+/*--------------------------------------------------------------------------*/
 {
     LVITEM  item;
 
@@ -241,10 +371,19 @@ void LVFocusItem ( HWND hList, int index )
     SendMessage ( hList, LVM_SETITEMSTATE, index, ( LPARAM )&item );
 }
 
-
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVUnselectItem 
+/*--------------------------------------------------------------------------*/
+//           Type: void 
+//    Param.    1: HWND hList: 
+//    Param.    2: int index : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: unselect one
+/*--------------------------------------------------------------------@@-@@-*/
 void LVUnselectItem ( HWND hList, int index )
-/*****************************************************************************************************************/
-/* unselect one                                                                                                  */
+/*--------------------------------------------------------------------------*/
 {
     LVITEM  item;
 
@@ -254,25 +393,50 @@ void LVUnselectItem ( HWND hList, int index )
     SendMessage ( hList, LVM_SETITEMSTATE, index, ( LPARAM )&item );
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: LVEnsureVisible 
+/*--------------------------------------------------------------------------*/
+//           Type: BOOL 
+//    Param.    1: HWND hList: 
+//    Param.    2: int index : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: scroll a item into view
+/*--------------------------------------------------------------------@@-@@-*/
 BOOL LVEnsureVisible ( HWND hList, int index )
-/*****************************************************************************************************************/
-/* scroll a bit to ensure item visibility                                                                        */
+/*--------------------------------------------------------------------------*/
 {
-    return (BOOL)SendMessage ( hList, LVM_ENSUREVISIBLE, index, (LPARAM)FALSE );
+    return (BOOL)SendMessage ( hList, LVM_ENSUREVISIBLE, index, (LPARAM)FALSE);
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: InitImgList 
+/*--------------------------------------------------------------------------*/
+//           Type: HIMAGELIST 
+//    Param.    1: HINSTANCE hInst : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: make IMG list for the LV, from resource icons
+/*--------------------------------------------------------------------@@-@@-*/
 HIMAGELIST InitImgList ( HINSTANCE hInst )
-/*****************************************************************************************************************/
-/* make IMG list for the LV, from resource icons                                                                 */
+/*--------------------------------------------------------------------------*/
 {
     HIMAGELIST  img;
 
     img = ImageList_Create ( 16, 16, ILC_COLOR32 | ILC_MASK, 0, 2 );
 
-    if ( !img ) { return NULL; }
+    if ( !img )
+        return NULL;
 
-    if ( ImageList_AddIcon ( img, LoadIcon ( hInst, MAKEINTRESOURCE ( IDI_LISTICON ) ) ) == -1 ) return NULL;
-    if ( ImageList_AddIcon ( img, LoadIcon ( hInst, MAKEINTRESOURCE ( IDI_PLAYICON ) ) ) == -1 ) return NULL;
+    if ( ImageList_AddIcon ( img, LoadIcon 
+        ( hInst, MAKEINTRESOURCE ( IDI_LISTICON ) ) ) == -1 )
+            return NULL;
+
+    if ( ImageList_AddIcon ( img, LoadIcon 
+        ( hInst, MAKEINTRESOURCE ( IDI_PLAYICON ) ) ) == -1 )
+            return NULL;
 
     return img;
 }

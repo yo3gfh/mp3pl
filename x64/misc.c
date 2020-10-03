@@ -1,46 +1,4 @@
-/*
-    MP3PL, a small mp3 and flac player 
-    -------------------------------------------------------------------
-    Copyright (c) 2002-2020 Adrian Petrila, YO3GFH
-    Uses the BASS sound system by Ian Luck (http://www.un4seen.com/)
-    Inspired by the examples included with the bass library.
-    
-    This was my "most ambitious" project at the time, right before being
-    drafted in the army. Dugged out recently and dusted off to compile with
-    Pelle's C compiler.
-    
-                                * * *
-                                
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-                                * * *
-
-    Features
-    ---------
-    
-        - play mp3 and flac files
-        - save and load playlists
-        - volume, spectrum analyzer and waveform (scope) display
-        
-    Please note that this is cca. 20 years old code, not particullary something
-    to write home about :-))
-    
-    It's taylored to my own needs, modify it to suit your own. I'm not a professional programmer,
-    so this isn't the best code you'll find on the web, you have been warned :-))
-
-    All the bugs are guaranteed to be genuine, and are exclusively mine =)
-*/
 #pragma warn(disable: 2008 2118 2228 2231 2030 2260)
 
 #include        <windows.h>
@@ -49,24 +7,27 @@
 #include        "resource.h"
 
 
-const TCHAR * app_title     = TEXT("Lil' MP3 player");
+const TCHAR * app_title     = 
+    TEXT("Lil' MP3 player");
 
-const TCHAR * about_txt     = TEXT("Lil' MP3 player")
-                              TEXT("\t\tCopyright (c) 2003-2020, Adrian Petrila\n")
-                              TEXT("BASS sound system v%d.%d\tCopyright (c) 1999-2019, Ian Luck\n");
+const TCHAR * about_txt     = 
+    TEXT("Lil' MP3 player")
+    TEXT("\t\tCopyright (c) 2003-2020, Adrian Petrila\n")
+    TEXT("BASS sound system v%d.%d\tCopyright (c) 1999-2019, Ian Luck\n");
 
-const TCHAR * hlp_txt       = TEXT("Space, Enter, dblclick\t\tPlay/Resume\n")
-                              TEXT("Esc\t\t\tStop playback\n")
-                              TEXT("Ctrl+P\t\t\tPause/Resume\n")
-                              TEXT("Ctrl+B\t\t\tNext track\n")
-                              TEXT("Ctrl+Left Arrow\t\tRewind\n")
-                              TEXT("Ctrl+Right Arrow\t\tFast-forward\n\n")
-                              TEXT("Ctrl+O\t\t\tOpen playlist\n")
-                              TEXT("Ctrl+Ins\t\t\tAdd files to playlist\n")
-                              TEXT("Ctrl+S\t\t\tSave playlist\n")
-                              TEXT("Ctrl+A\t\t\tSelect all\n")
-                              TEXT("Shift+Del\t\t\tClear all\n")
-                              TEXT("Del\t\t\tDelete selected");
+const TCHAR * hlp_txt       = 
+    TEXT("Space, Enter, dblclick\t\tPlay/Resume\n")
+    TEXT("Esc\t\t\tStop playback\n")
+    TEXT("Ctrl+P\t\t\tPause/Resume\n")
+    TEXT("Ctrl+B\t\t\tNext track\n")
+    TEXT("Ctrl+Left Arrow\t\tRewind\n")
+    TEXT("Ctrl+Right Arrow\t\tFast-forward\n\n")
+    TEXT("Ctrl+O\t\t\tOpen playlist\n")
+    TEXT("Ctrl+Ins\t\t\tAdd files to playlist\n")
+    TEXT("Ctrl+S\t\t\tSave playlist\n")
+    TEXT("Ctrl+A\t\t\tSelect all\n")
+    TEXT("Shift+Del\t\t\tClear all\n")
+    TEXT("Del\t\t\tDelete selected");
 
 const TCHAR * g_err_messages[] = { 
     TEXT("Can't load accelerator table!"),                              //0
@@ -85,27 +46,59 @@ const TCHAR * g_err_messages[] = {
     TEXT("Unable to start playback!")                                   //13
 };
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: Extract_path 
+/*--------------------------------------------------------------------------*/
+//           Type: const TCHAR * 
+//    Param.    1: const TCHAR * src: 
+//    Param.    2: BOOL last_bslash : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: make a path from a filename
+/*--------------------------------------------------------------------@@-@@-*/
 const TCHAR * Extract_path ( const TCHAR * src, BOOL last_bslash )
-/*****************************************************************************************************************/
-/* make a path from a filename                                                                                   */
+/*--------------------------------------------------------------------------*/
 {
     DWORD           idx;
     static TCHAR    temp[MAX_PATH];
 
-    if ( src == NULL ) { return NULL; }
+    if ( src == NULL )
+        return NULL;
+
     idx = lstrlen ( src )-1;
-    if ( idx >= MAX_PATH ) { return NULL; }
+
+    if ( idx >= MAX_PATH )
+        return NULL;
+
     while ( ( src[idx] != TEXT('\\') ) && ( idx != 0 ) )
         idx--;
-    if ( idx == 0 ) { return NULL; }
-    if ( last_bslash ) { idx++; }
+
+    if ( idx == 0 )
+        return NULL;
+
+    if ( last_bslash )
+        idx++;
+
     StringCchCopyN ( temp, ARRAYSIZE(temp), src, idx );
+
     return temp;
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: ShowMessage 
+/*--------------------------------------------------------------------------*/
+//           Type: int 
+//    Param.    1: HWND howner          : 
+//    Param.    2: const TCHAR * message: 
+//    Param.    3: DWORD style          : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: custom messagebox
+/*--------------------------------------------------------------------@@-@@-*/
 int ShowMessage ( HWND howner, const TCHAR * message, DWORD style )
-/*****************************************************************************************************************/
-/* custom messagebox                                                                                             */
+/*--------------------------------------------------------------------------*/
 {
     MSGBOXPARAMS    mp;
 
@@ -122,9 +115,18 @@ int ShowMessage ( HWND howner, const TCHAR * message, DWORD style )
     return MessageBoxIndirect ( &mp );
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: Load_BASS_Plugins 
+/*--------------------------------------------------------------------------*/
+//           Type: BOOL 
+//    Param.    1: void : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: load any present plugins
+/*--------------------------------------------------------------------@@-@@-*/
 BOOL Load_BASS_Plugins ( void )
-/*****************************************************************************************************************/
-/* load plugin dlls                                                                                              */
+/*--------------------------------------------------------------------------*/
 {
     WIN32_FIND_DATA     fd;
     HANDLE              fh;
@@ -133,18 +135,21 @@ BOOL Load_BASS_Plugins ( void )
     char                plug_name[MAX_PATH];
     #endif
 
-    GetModuleFileName ( 0, path, sizeof ( path ) );
-    StringCchCopyN ( temp, ARRAYSIZE(temp), Extract_path ( path, TRUE ), MAX_PATH-1 );
+    GetModuleFileName ( 0, path, ARRAYSIZE( path ));
+    StringCchCopyN ( temp, ARRAYSIZE(temp), 
+        Extract_path ( path, TRUE ), MAX_PATH-1 );
     StringCchCat ( temp, ARRAYSIZE(temp), TEXT("bass*.dll") );
 
     fh = FindFirstFile ( temp, &fd );
 
-    if ( fh == INVALID_HANDLE_VALUE ) { return FALSE; }
+    if ( fh == INVALID_HANDLE_VALUE )
+        return FALSE;
 
     do
     {
         #ifdef UNICODE
-        WideCharToMultiByte ( CP_ACP, 0, fd.cFileName, -1, plug_name, sizeof ( plug_name ), NULL, NULL );
+        WideCharToMultiByte ( CP_ACP, 0, fd.cFileName, -1, 
+            plug_name, sizeof ( plug_name ), NULL, NULL );
         BASS_PluginLoad ( plug_name, 0 );
         #else
         BASS_PluginLoad ( fd.cFileName, 0 );
@@ -156,31 +161,66 @@ BOOL Load_BASS_Plugins ( void )
     return TRUE;
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: BASS_Error 
+/*--------------------------------------------------------------------------*/
+//           Type: void 
+//    Param.    1: HWND howner           : 
+//    Param.    2: const TCHAR * message : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: fetch last BASS error
+/*--------------------------------------------------------------------@@-@@-*/
 void BASS_Error ( HWND howner, const TCHAR * message )
-/*****************************************************************************************************************/
-/* fetch last BASS error                                                                                         */
+/*--------------------------------------------------------------------------*/
 {
     TCHAR   temp[128];
 #ifdef UNICODE
-    StringCchPrintf ( temp, ARRAYSIZE(temp), L"%ls\nError code: %d", message, BASS_ErrorGetCode() );
+    StringCchPrintf ( temp, ARRAYSIZE(temp), 
+        L"%ls\nError code: %d", message, BASS_ErrorGetCode() );
 #else
-    StringCchPrintf ( temp, ARRAYSIZE(temp), "%s\nError code: %d", message, BASS_ErrorGetCode() );
+    StringCchPrintf ( temp, ARRAYSIZE(temp), 
+        "%s\nError code: %d", message, BASS_ErrorGetCode() );
 #endif
     ShowMessage ( howner, temp, MB_OK );
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: IsThereAnotherInstance 
+/*--------------------------------------------------------------------------*/
+//           Type: BOOL 
+//    Param.    1: const TCHAR * classname : 
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Adrian Petrila, YO3GFH
+//           DATE: 03.10.2020
+//    DESCRIPTION: Is there another :-)
+/*--------------------------------------------------------------------@@-@@-*/
 BOOL IsThereAnotherInstance ( const TCHAR * classname )
-/*****************************************************************************************************************/
+/*--------------------------------------------------------------------------*/
 {
     return ( FindWindow ( classname, NULL ) != NULL );
 }
 
+/*-@@+@@--------------------------------------------------------------------*/
+//       Function: FILE_CommandLineToArgv
+/*--------------------------------------------------------------------------*/
+//           Type: TCHAR **
+//    Param.    1: TCHAR * CmdLine: pointer to app commandline
+//    Param.    2: int * _argc    : pointer to var to receive arg. count
+/*--------------------------------------------------------------------------*/
+//         AUTHOR: Thanks to Alexander A. Telyatnikov,
+//                 http://alter.org.ua/en/docs/win/args/
+//           DATE: 28.09.2020
+//    DESCRIPTION: Nice little function! Takes a command line and breaks it
+//                 into null term. strings (_argv) indexed by an array of
+//                 pointers (argv). All necessary mem. is allocated
+//                 dynamically, _argv and argv being stored one after the
+//                 other. It returns the pointers table, which you must free
+//                 with GlobalFree after getting the job done.
+/*--------------------------------------------------------------------@@-@@-*/
 TCHAR ** FILE_CommandLineToArgv ( TCHAR * CmdLine, int * _argc )
-/*****************************************************************************************************************/
-/* Thanks to Alexander A. Telyatnikov                                                                            */
-/* http://alter.org.ua/en/docs/win/args/                                                                         */
-/* Don't forget to GlobalFree                                                                                    */
-
+/*--------------------------------------------------------------------------*/
 {
     TCHAR       ** argv;
     TCHAR       *  _argv;
@@ -193,13 +233,18 @@ TCHAR ** FILE_CommandLineToArgv ( TCHAR * CmdLine, int * _argc )
     BOOLEAN     in_TEXT;
     BOOLEAN     in_SPACE;
 
-    if ( CmdLine == NULL || _argc == NULL ) { return NULL; }
+    if ( CmdLine == NULL || _argc == NULL )
+        return NULL;
 
     len = lstrlen ( CmdLine );
     i = ((len+2)/2)*sizeof(PVOID) + sizeof(PVOID);
 
-    argv = (TCHAR**)GlobalAlloc(GMEM_FIXED, i + (len+2)*sizeof(TCHAR));
-    if ( argv == NULL ) { return NULL; }
+    argv = (TCHAR**)GlobalAlloc(GMEM_FIXED, 
+        (i + (len+2)*sizeof(TCHAR) + 4096 + 1) & (~4095) );
+
+    if ( argv == NULL )
+        return NULL; 
+
     _argv = (TCHAR*)(((UCHAR*)argv)+i);
 
     argc = 0;

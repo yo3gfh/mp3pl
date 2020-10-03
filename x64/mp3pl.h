@@ -33,11 +33,12 @@
         - save and load playlists
         - volume, spectrum analyzer and waveform (scope) display
         
-    Please note that this is cca. 20 years old code, not particullary something
-    to write home about :-))
+    Please note that this is cca. 20 years old code, not particullary 
+    something to write home about :-))
     
-    It's taylored to my own needs, modify it to suit your own. I'm not a professional programmer,
-    so this isn't the best code you'll find on the web, you have been warned :-))
+    It's taylored to my own needs, modify it to suit your own. 
+    I'm not a professional programmer, so this isn't the best code you'll find
+    on the web, you have been warned :-))
 
     All the bugs are guaranteed to be genuine, and are exclusively mine =)
 */
@@ -45,16 +46,19 @@
 #ifndef _MP3PL_H
 #define _MP3PL_H
 
-#define     UPDATE_INTERVAL 25              // timer update interval; greater values,
-                                            // jerkier volume & spectrum - smaller values,
-                                            // possible blue screen savers :))))
-                                         
-#define     MAX_RANGE       0x4000          // position trackbar maximum range
+// timer update interval; greater values,
+// jerkier volume & spectrum - smaller values,
+// possible blue screen savers :))))
+
+#define     UPDATE_INTERVAL 25
+                             
+// position trackbar maximum range            
+#define     MAX_RANGE       0x4000          
 #define     POS_INCREMENT   500
 
-
-#define     BMP_STUFF_SIZE  ( ( sizeof ( BITMAPINFOHEADER ) ) + \
-                            ( 256 * ( sizeof ( RGBQUAD ) ) ) ) // DIB header size
+// DIB header size
+#define     BMP_STUFF_SIZE  ((sizeof(BITMAPINFOHEADER)) + \
+                            (256 * (sizeof(RGBQUAD)))) 
 
 #define     FFTS            1024
 #define     APP_CLASSNAME   TEXT("MPL_CLASS_666")
