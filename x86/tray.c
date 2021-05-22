@@ -23,7 +23,7 @@
 BOOL Tray_Add ( HWND hwnd, UINT uID, HICON hicon, const TCHAR * lpszTip )
 /*--------------------------------------------------------------------------*/
 {
-    NOTIFYICONDATA  ni;
+    NOTIFYICONDATA      ni;
 
     ni.cbSize           = sizeof ( NOTIFYICONDATA );
     ni.hWnd             = hwnd;

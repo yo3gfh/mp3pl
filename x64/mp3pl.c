@@ -1589,8 +1589,8 @@ static BOOL Process_WM_COPYDATA ( HWND hwnd, WPARAM wParam, LPARAM lParam )
                 PostMessage ( hwnd, WM_TRAY, (WPARAM)0, 
                     (LPARAM)WM_LBUTTONDOWN );
             }
-            // bring program window to foreground by momentarily making it topmost
-            // ...but only if it isn't already 8-)
+            // bring program window to foreground by momentarily making it 
+            // topmost ...but only if it isn't already 8-)
             SetWindowPos ( hwnd, HWND_TOPMOST, 0, 0, 0, 0, 
                 SWP_SHOWWINDOW| SWP_NOMOVE | SWP_NOSIZE );
             SetWindowPos ( hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, 

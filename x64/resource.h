@@ -23,20 +23,20 @@
 #define IDC_LEVELS                      1666
 #define IDC_DEVLIST                     4002
 
-#define IDM_QUIT                        40002
-#define IDM_ADD                         40003
-#define IDM_DEL                         40004
-#define IDM_CLEAR                       40005
-#define IDM_PLAY                        40006
-#define IDM_ABOUT                       40007
-#define IDM_STOP                        40008
-#define IDM_PAUSE                       40009
-#define IDM_SELALL                      40010
-#define IDM_NEXT                        40011
-#define IDM_REW                         40012
-#define IDM_FFW                         40013
-#define IDM_KEYHLP                      40014
-#define IDM_OPEN                        40015
-#define IDM_SAVE                        40016
+#define IDM_QUIT                        6017 //40002
+#define IDM_ADD                         6018 //40003
+#define IDM_DEL                         6021 //40004
+#define IDM_CLEAR                       6020 //40005
+#define IDM_PLAY                        6022 //40006
+#define IDM_ABOUT                       6023 //40007
+#define IDM_STOP                        6024 //40008
+#define IDM_PAUSE                       6025 //40009
+#define IDM_SELALL                      6019 //40010
+#define IDM_NEXT                        6026 //40011
+#define IDM_REW                         6027 //40012
+#define IDM_FFW                         6028 //40013
+#define IDM_KEYHLP                      6029 //40014
+#define IDM_OPEN                        6015 //40015
+#define IDM_SAVE                        6016 //40016
 
 #endif
